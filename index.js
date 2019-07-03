@@ -2,6 +2,7 @@ const chardet = require('chardet');
 const fs = require('fs');
 const loaderUtils = require('loader-utils');
 const nunjucks = require('nunjucks');
+const I18nExtension = require("nunjucks-i18n")(nunjucks);
 const path = require('path');
 
 module.exports = function(source) {
@@ -12,23 +13,23 @@ module.exports = function(source) {
       if (typeof alias === 'object') {
         for (key in alias) {
           const patt = new RegExp(`^~${key}`);
-  
+
           if (patt.test(filePath)) {
             return path.join(alias[key], filePath.replace(patt, ''));
           }
         }
       }
-  
+
       return path.resolve(startPath, filePath);
     };
-  
+
     return {
       getSource: filePath => {
         const completePath = resolvePath(filePath);
         this.addDependency(completePath);
         const dataBuffer = fs.readFileSync(completePath);
         // const charset = chardet.detect(dataBuffer);
-  
+
         return {
           src: dataBuffer
             .toString('UTF-8', 0, dataBuffer.length)
@@ -53,6 +54,13 @@ module.exports = function(source) {
     for (const key of Object.keys(options.globals)) {
       env.addGlobal(key, options.globals[key])
     }
+  }
+
+  if (options.translations) {
+    env.addExtension('I18nExtension', new I18nExtension({
+      env,
+      translations: options.translations
+    }));
   }
 
   const compiled = nunjucks.compile(source, env);
