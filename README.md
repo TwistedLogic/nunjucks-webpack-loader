@@ -39,6 +39,11 @@ In your webpack.config.js and add to rules block:
                         variableEnd: '}}',
                         commentStart: '{#',
                         commentEnd: '#}'
+                    },
+                    globals: { // To add globals to nunjucks environment
+                        key1: value1,
+                        key2: value2,
+                        ...
                     }
                 }
         }]
